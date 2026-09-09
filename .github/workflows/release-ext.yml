@@ -64,8 +64,12 @@ jobs:
           if [ -z "$TAG" ]; then
             if [ -n "$PRERELEASE_ID" ]; then TAG="$PRERELEASE_ID"; else TAG="latest"; fi
           fi
-          echo "release_tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "prerelease=$([ "$TAG" = "latest" ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+          if [ "$TAG" = "latest" ]; then
+            echo "release_title=ext-v${NEW}" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_title=ext-v${NEW} ($TAG)" >> "$GITHUB_OUTPUT"
+          fi
 
           for f in src/manifest.chrome.json src/manifest.firefox.json; do
             node -e "
@@ -104,8 +108,7 @@ jobs:
           [ -f ext/dist/firefox.xpi ] && ASSETS+=("ext/dist/firefox.xpi#connpass-pickup-ext-firefox-${VERSION}.xpi")
 
           gh release create "${{ steps.bump.outputs.version }}" \
-            --title "${{ steps.bump.outputs.version }} (${{ steps.bump.outputs.release_tag }})" \
+            --title "${{ steps.bump.outputs.release_title }}" \
             --generate-notes \
-            --notes "拡張機能(Chrome/Firefox)のビルド成果物を添付しています。ストアへの提出は別途手動で行ってください。" \
             "${ASSETS[@]}" \
             ${{ steps.bump.outputs.prerelease == 'true' && '--prerelease' || '' }}
