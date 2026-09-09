@@ -65,17 +65,17 @@ pnpm run ci && pnpm run typecheck && pnpm run test && pnpm run build
 
 `pkg/` と `ext/` はバージョンも公開先も別々なので、リリースワークフローも分かれています。GitHub Actions からそれぞれ手動(`workflow_dispatch`)で実行してください。
 
+pkg・ext とも `version`(`patch`/`minor`/`major`/`prerelease` のいずれか、または `6.1.0` のような明示的なバージョン)と `dist_tag`(`latest`/`beta`/`rc` など。空欄なら自動判定: バージョンにプレリリース識別子があればそれを、無ければ `latest` を使う)を指定する同じ方式です。`dist_tag` が `latest` 以外のときは GitHub Release が pre-release になります。
+
 ### pkg(npmパッケージ)— `release-pkg` ワークフロー
 
-`version` に `patch`/`minor`/`major`/`prerelease` のいずれか、または `6.1.0` のような明示的なバージョンを指定します。`pkg/` のチェック・ビルド・バージョン更新・npm への公開(trusted publishing、OIDC 経由で `NPM_TOKEN` は不要)・コミットとタグ(`pkg-v<version>`)の push・GitHub Release の作成までを行います。
+`pkg/` のチェック・ビルド・バージョン更新・npm への公開(trusted publishing、OIDC 経由で `NPM_TOKEN` は不要、`dist_tag` をそのまま npm の dist-tag として使用)・コミットとタグ(`pkg-v<version>`)の push・GitHub Release の作成までを行います。
 
 trusted publishing は npmjs.com 側で一度だけ設定が必要です(`connpass-pickup` パッケージの Settings → Publishing access → Trusted publishers → GitHub で、このリポジトリの `release-pkg.yml` を指定します)。
 
 ### ext(ブラウザ拡張機能)— `release-ext` ワークフロー
 
-`version` は `1.2.3` のような明示的なバージョンのみ受け付けます(空欄なら `ext/package.json` の現在のバージョンをそのままリリースします)。指定した場合は `ext/package.json` と両マニフェスト(`manifest.chrome.json`/`manifest.firefox.json`)のバージョンをまとめて更新します。
-
-最新の `ext-v*` タグ以下のバージョンではリリースをスキップします(`force_release: true` で強制可能)。`target`(既定 `all`)で `chrome`/`firefox` のどちらかだけをビルドすることもできます。
+`ext/package.json` と両マニフェスト(`manifest.chrome.json`/`manifest.firefox.json`)のバージョンをまとめて更新し、コミットとタグ(`ext-v<version>`)を push して GitHub Release を作成します。`target`(既定 `all`)で `chrome`/`firefox` のどちらかだけをビルドすることもできます。
 
 npmへの公開は行わず、Chrome向けの zip と、[web-ext](https://github.com/mozilla/web-ext) でビルドした Firefox 向けの xpi を GitHub Release に添付します。各ストアへの提出は別途手動で行う必要があります。
 

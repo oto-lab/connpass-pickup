@@ -1,3 +1,5 @@
+export { ConnpassClient, type ConnpassClientOptions } from "./client.js";
+
 export { shuffle } from "./core/shuffle.js";
 export {
   buildResultMarkdown,
@@ -7,6 +9,7 @@ export {
   saveResult,
   openResult,
   type ResultFormat,
+  type OpenOptions,
 } from "./core/result.js";
 
 export { getResultsDir } from "./paths.js";

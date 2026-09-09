@@ -58,30 +58,53 @@ CONNPASS_PICKUP_RETRY=3 CONNPASS_PICKUP_TIMEOUT=10000 pickup 385269
 
 CLI が内部で行っている処理はすべて公開APIとして呼び出せます。ESM/CJS どちらからでも利用できます。
 
+### ConnpassClient(推奨)
+
+User-Agent・プロキシ・リトライ・タイムアウトなどを毎回渡し直さなくて済むよう、`ConnpassClient` に一度だけ設定してインスタンスを使い回せます。
+
 ```ts
-import {
-  fetchParticipants,
-  shuffle,
-  buildResultMarkdown,
-  renderResultHtml,
-  saveResult,
-} from "connpass-pickup";
+import { ConnpassClient } from "connpass-pickup";
 
-const participants = await fetchParticipants("385269");
-const members = shuffle(participants["General Attendees / 参加枠"]);
+const client = new ConnpassClient({
+  proxy: "http://127.0.0.1:8080",
+  retry: 3,
+  timeout: 10_000,
+});
 
-const markdown = buildResultMarkdown("385269", members);
-const html = await renderResultHtml(markdown);
-await saveResult("385269", html, "html");
+const participants = await client.fetchParticipants("385269");
+const members = client.shuffle(participants["General Attendees / 参加枠"]);
+
+const markdown = client.buildResultMarkdown("385269", members);
+const html = await client.renderResultHtml(markdown);
+const filePath = await client.saveResult("385269", html, "html");
+await client.openResult(filePath);
+
+// 同じclientで、別のイベントも同じ接続設定のまま取得できる
+const event = await client.fetchEvent("385269");
 ```
+
+コンストラクタに渡したオプションは、各メソッド呼び出し時に個別のオプションで上書きできます(呼び出し時の値が優先されます)。
 
 ```js
-const { fetchParticipants } = require("connpass-pickup");
+const { ConnpassClient } = require("connpass-pickup");
 ```
 
-### 提供している関数
+### 関数として使う
 
-| 関数 | 説明 |
+インスタンスを作らず、必要な関数だけをその都度呼び出すこともできます。
+
+```ts
+import { fetchParticipants, shuffle } from "connpass-pickup";
+
+const participants = await fetchParticipants("385269", { retry: 3 });
+const members = shuffle(participants["General Attendees / 参加枠"]);
+```
+
+### 提供している機能
+
+`ConnpassClient` のメソッドと、同名の関数の両方から利用できます(`client.fetchParticipants(...)` と `fetchParticipants(...)` は同じ処理です)。
+
+| 機能 | 説明 |
 | --- | --- |
 | `fetchParticipants(eventId, options?)` | 参加者ページから募集枠ごとの参加者一覧を取得する(100人超の枠は自動でページ送りして全件取得) |
 | `fetchParticipantsDetailed(eventId, options?)` | 参加者一覧に加え、枠ごとの取得件数・全体人数・切り詰めの有無(`truncated`)を返す |
@@ -90,7 +113,7 @@ const { fetchParticipants } = require("connpass-pickup");
 | `renderResultHtml(markdown)` | MarkdownをスタイルつきのHTML文字列に変換する |
 | `toJson(data)` / `toCsv(members)` | 結果をJSON/CSV文字列にする |
 | `saveResult(eventId, content, format)` | 結果をOS標準のディレクトリに保存する(`format`: `html`/`markdown`/`json`/`csv`) |
-| `openResult(filePath)` | 保存したファイルを既定のアプリで開く |
+| `openResult(filePath, options?)` | 保存したファイルを既定のアプリで開く。`options` は [open](https://github.com/sindresorhus/open) にそのまま渡される(`wait`: 起動したアプリの終了を待つ、`app`: 開くアプリを指定する、など) |
 | `getResultsDir()` | 結果の保存先ディレクトリを取得する |
 | `fetchEvent(eventId, options?)` | イベントの詳細情報(タイトル・日時・会場・募集枠の定員など)を取得する |
 | `fetchEventsBatch(eventIds, options?)` | 複数イベントの情報をまとめて取得する |
@@ -103,7 +126,7 @@ const { fetchParticipants } = require("connpass-pickup");
 
 ### リクエストの共通オプション
 
-上記の `options` はすべて次のフィールドを受け取れます(いずれも省略可能)。
+`ConnpassClient` のコンストラクタ、および上記の各関数・メソッドの `options` は、いずれも次のフィールドを受け取れます(すべて省略可能)。
 
 | フィールド | 説明 |
 | --- | --- |
@@ -113,18 +136,7 @@ const { fetchParticipants } = require("connpass-pickup");
 | `retryDelay` | リトライ間隔(ミリ秒) |
 | `timeout` | タイムアウト(ミリ秒) |
 
-```ts
-import { fetchEvent } from "connpass-pickup";
-
-const event = await fetchEvent("385269", {
-  proxy: "http://127.0.0.1:8080",
-  retry: 3,
-  retryDelay: 1000,
-  timeout: 10_000,
-});
-```
-
-`fetchParticipants`/`fetchParticipantsDetailed` はさらに次のフィールドも受け取れます。
+`fetchParticipants`/`fetchParticipantsDetailed`(および `ConnpassClient` のコンストラクタ)はさらに次のフィールドも受け取れます。
 
 | フィールド | 説明 |
 | --- | --- |

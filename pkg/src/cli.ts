@@ -7,17 +7,7 @@ import { exec } from "node:child_process";
 import util from "node:util";
 
 import pkg from "../package.json" with { type: "json" };
-import {
-  fetchParticipantsDetailed,
-  type FetchParticipantsOptions,
-} from "./participants/fetch-participants.js";
-import { shuffle } from "./core/shuffle.js";
-import {
-  buildResultMarkdown,
-  renderResultHtml,
-  saveResult,
-  openResult,
-} from "./core/result.js";
+import { ConnpassClient, type ConnpassClientOptions } from "./client.js";
 
 function envNumber(name: string): number | undefined {
   const raw = process.env[name];
@@ -27,18 +17,19 @@ function envNumber(name: string): number | undefined {
 }
 
 /**
- * connpassへのアクセス設定を環境変数から読み取る。
+ * connpassへのアクセス設定を環境変数から読み取り、CLI全体で使い回す
+ * {@link ConnpassClient} を組み立てる。
  * `CONNPASS_PICKUP_USER_AGENT` / `CONNPASS_PICKUP_PROXY` / `CONNPASS_PICKUP_RETRY` /
- * `CONNPASS_PICKUP_TIMEOUT` のいずれも未設定なら省略され、各関数の既定動作になる。
+ * `CONNPASS_PICKUP_TIMEOUT` のいずれも未設定なら省略され、各機能の既定動作になる。
  */
-function requestOptionsFromEnv(): FetchParticipantsOptions {
-  const retry = envNumber("CONNPASS_PICKUP_RETRY");
-  return {
+function createClientFromEnv(): ConnpassClient {
+  const options: ConnpassClientOptions = {
     userAgent: process.env.CONNPASS_PICKUP_USER_AGENT,
     proxy: process.env.CONNPASS_PICKUP_PROXY,
-    retry,
+    retry: envNumber("CONNPASS_PICKUP_RETRY"),
     timeout: envNumber("CONNPASS_PICKUP_TIMEOUT"),
   };
+  return new ConnpassClient(options);
 }
 
 const currentVersion = pkg.version;
@@ -120,7 +111,7 @@ async function main(): Promise<void> {
 
     await checkVersion();
 
-    const requestOptions = requestOptionsFromEnv();
+    const client = createClientFromEnv();
 
     let eventId: string;
     const argEventId = process.argv[2];
@@ -148,10 +139,8 @@ async function main(): Promise<void> {
     console.log(`\neventId: ${eventId}`);
     console.log("参加者情報を取得中...");
 
-    const { participants, roles } = await fetchParticipantsDetailed(
-      eventId,
-      requestOptions
-    );
+    const { participants, roles } =
+      await client.fetchParticipantsDetailed(eventId);
 
     console.log("\n--- 取得完了 ---");
     console.log(participants);
@@ -239,7 +228,7 @@ async function main(): Promise<void> {
       return process.exit(0);
     }
 
-    const shuffled = shuffle(members);
+    const shuffled = client.shuffle(members);
 
     console.log("\n--- 順番 ---");
     shuffled.forEach((member, index) => {
@@ -247,10 +236,10 @@ async function main(): Promise<void> {
     });
 
     if (answers.saveHtml) {
-      const markdown = buildResultMarkdown(eventId, shuffled);
-      const html = await renderResultHtml(markdown);
-      const filePath = await saveResult(eventId, html, "html");
-      await openResult(filePath);
+      const markdown = client.buildResultMarkdown(eventId, shuffled);
+      const html = await client.renderResultHtml(markdown);
+      const filePath = await client.saveResult(eventId, html, "html");
+      await client.openResult(filePath);
       console.log(`\nブラウザで結果を表示します: ${filePath}`);
     }
   } catch (e) {

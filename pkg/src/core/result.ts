@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import MarkdownIt from "markdown-it";
 import prettier from "prettier";
-import open from "open";
+import open, { type Options as OpenOptions } from "open";
 import { getResultsDir } from "../paths.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -106,10 +106,17 @@ export async function saveResult(
   return filePath;
 }
 
+export type { OpenOptions };
+
 /**
  * 保存済みの結果ファイルを既定のブラウザ/アプリで開く。
  * CLI だけでなくプログラムからも同じ体験を再現できるよう公開している。
+ * `options` はそのまま [open](https://github.com/sindresorhus/open) に渡される
+ * (`wait`: 起動したアプリの終了を待つ、`app`: 開くアプリを指定する、など)。
  */
-export async function openResult(filePath: string): Promise<void> {
-  await open(filePath);
+export async function openResult(
+  filePath: string,
+  options?: OpenOptions
+): Promise<void> {
+  await open(filePath, options);
 }

@@ -9,8 +9,17 @@ vi.mock("../paths.js", () => ({
   getResultsDir: () => tempDir,
 }));
 
-const { buildResultMarkdown, renderResultHtml, toJson, toCsv, saveResult } =
-  await import("./result.js");
+const openMock = vi.fn().mockResolvedValue(undefined);
+vi.mock("open", () => ({ default: (...args: unknown[]) => openMock(...args) }));
+
+const {
+  buildResultMarkdown,
+  renderResultHtml,
+  toJson,
+  toCsv,
+  saveResult,
+  openResult,
+} = await import("./result.js");
 
 describe("buildResultMarkdown", () => {
   it("イベントURLと番号付きリストを含むMarkdownを組み立てる", () => {
@@ -60,5 +69,23 @@ describe("saveResult", () => {
     expect(filePath.endsWith(".csv")).toBe(true);
     expect(filePath.startsWith(tempDir)).toBe(true);
     expect(await readFile(filePath, "utf-8")).toBe("1,Alice");
+  });
+});
+
+describe("openResult", () => {
+  it("openにファイルパスを渡す", async () => {
+    await openResult("/path/to/result.html");
+    expect(openMock).toHaveBeenCalledWith("/path/to/result.html", undefined);
+  });
+
+  it("optionsをopenにそのまま渡す", async () => {
+    await openResult("/path/to/result.html", {
+      wait: true,
+      app: { name: "firefox" },
+    });
+    expect(openMock).toHaveBeenCalledWith("/path/to/result.html", {
+      wait: true,
+      app: { name: "firefox" },
+    });
   });
 });
