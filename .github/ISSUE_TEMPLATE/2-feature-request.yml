@@ -1,0 +1,27 @@
+name: 🚀 機能要望
+description: アイデアや機能追加、改善案を提案する
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提案ありがとうございます。connpass-pickup の改善に役立ちます。
+  - type: dropdown
+    attributes:
+      label: 対象はどちらですか？
+      options:
+        - pkg(npmパッケージ / CLI)
+        - ext(ブラウザ拡張機能)
+        - 両方 / わからない
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 提案したい機能を教えてください
+      description: 何を実現したいか、できるだけ具体的に書いてください。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: なぜその機能が必要ですか？
+      description: 困っていることや、解決したい課題を教えてください。

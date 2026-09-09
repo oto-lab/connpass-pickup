@@ -1,0 +1,100 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "リリースするバージョン: semverのバンプ種別(patch/minor/major/prerelease)、または明示バージョン(例: 6.1.0)"
+        required: true
+        default: patch
+      dist_tag:
+        description: '公開先のnpm dist-tag。空欄なら自動判定(例: "6.1.0-beta.0"なら"beta"、通常バージョンなら"latest")'
+        required: false
+        default: ""
+
+# Trusted publishing: npmがこのワークフローをOIDCで認証するため、NPM_TOKEN シークレットは不要。
+# 事前に npmjs.com 側でリンクを設定しておく(パッケージ Settings -> Publishing access -> Trusted publishers -> GitHub)。
+permissions:
+  contents: write # バージョン更新コミット/タグの push と GitHub Release の作成
+  id-token: write # npm trusted publishing (OIDC)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install
+      - run: pnpm run ci
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run build
+      - run: pnpm --filter connpass-pickup-ext run package
+
+      - name: Bump pkg/ version
+        id: bump
+        working-directory: pkg
+        run: |
+          OLD="$(node -p "require('./package.json').version")"
+          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version >/dev/null
+          NEW="$(node -p "require('./package.json').version")"
+          echo "version=v${NEW}" >> "$GITHUB_OUTPUT"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::バージョンは既に ${NEW} のため、更新コミットはスキップしてリリースだけ行います。"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ "$NEW" == *-* ]]; then
+            REST="${NEW#*-}"
+            PRERELEASE_ID="${REST%%.*}"
+          else
+            PRERELEASE_ID=""
+          fi
+
+          TAG="${{ inputs.dist_tag }}"
+          if [ -z "$TAG" ]; then
+            if [ -n "$PRERELEASE_ID" ]; then TAG="$PRERELEASE_ID"; else TAG="latest"; fi
+          fi
+          echo "npm_tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$([ "$TAG" = "latest" ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+
+      # Trusted publishing: NODE_AUTH_TOKEN は使わない。
+      # GitHub が発行するOIDCトークンをnpmが短命な発行用クレデンシャルに交換する。
+      - run: npm install -g npm@11
+      - name: Publish pkg to npm
+        working-directory: pkg
+        run: npm publish --access public --provenance --tag "${{ steps.bump.outputs.npm_tag }}"
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ "${{ steps.bump.outputs.changed }}" = "true" ]; then
+            git commit -am "release: pkg ${{ steps.bump.outputs.version }}"
+          fi
+          if ! git rev-parse -q --verify "refs/tags/${{ steps.bump.outputs.version }}" >/dev/null; then
+            git tag "${{ steps.bump.outputs.version }}"
+          fi
+          git push origin HEAD "${{ steps.bump.outputs.version }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.bump.outputs.version }}" \
+            --title "${{ steps.bump.outputs.version }}" \
+            --generate-notes \
+            --notes "拡張機能(Chrome/Firefox)のビルド成果物を以下に添付しています。ストアへの提出は別途手動で行ってください。" \
+            ext/dist/chrome.zip#connpass-pickup-chrome.zip \
+            ext/dist/firefox.zip#connpass-pickup-firefox.zip \
+            ${{ steps.bump.outputs.prerelease == 'true' && '--prerelease' || '' }}

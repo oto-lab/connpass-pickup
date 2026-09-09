@@ -1,0 +1,81 @@
+{
+  "name": "connpass-pickup",
+  "version": "6.0.0",
+  "description": "connpass のイベント参加者情報をシャッフルする CLI と、connpass のイベント情報を扱う軽量スクレイピング API ライブラリ",
+  "keywords": [
+    "connpass",
+    "scrape",
+    "scraping",
+    "pickup",
+    "shuffle",
+    "event",
+    "cli",
+    "command"
+  ],
+  "homepage": "https://github.com/oto-lab/connpass-pickup#readme",
+  "bugs": {
+    "url": "https://github.com/oto-lab/connpass-pickup/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oto-lab/connpass-pickup.git",
+    "directory": "pkg"
+  },
+  "license": "MIT",
+  "author": "otoneko.",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "pickup": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist",
+    "assets"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:real": "vitest run --config vitest.real.config.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "ansis": "^4.3.1",
+    "cheerio": "^1.2.0",
+    "is-package-latest": "^3.2.0",
+    "markdown-it": "^15.0.1",
+    "ofetch": "^1.5.1",
+    "oh-my-logo": "^0.5.0",
+    "open": "^11.0.2",
+    "prettier": "catalog:",
+    "prompts": "^2.4.2",
+    "top-user-agents": "^2.1.134",
+    "undici": "^8.10.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/prompts": "^2.4.9",
+    "@vitest/coverage-v8": "catalog:",
+    "tsdown": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

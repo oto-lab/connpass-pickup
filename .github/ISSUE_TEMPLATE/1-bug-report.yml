@@ -1,0 +1,46 @@
+name: 🐛 不具合報告
+description: 直してほしい不具合を報告する
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        不具合報告ありがとうございます。connpass-pickup の改善に役立ちます。
+
+        できるだけ詳しい情報を書いていただけると助かります。
+  - type: dropdown
+    attributes:
+      label: 対象はどちらですか？
+      options:
+        - pkg(npmパッケージ / CLI)
+        - ext(ブラウザ拡張機能)
+        - 両方 / わからない
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: connpass-pickup のバージョンを教えてください
+      placeholder: "6.0.0(pkgの場合) / 1.0.0(extの場合)"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 実行環境を教えてください
+      placeholder: "Node.js 22.14.0 / Chrome 130 / Firefox 130 など"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 再現手順を教えてください
+      description: 実行したコマンドや操作、可能であればコード例も書いてください。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 本来期待する動作を教えてください
+  - type: textarea
+    attributes:
+      label: 実際に起きたことを教えてください
+  - type: textarea
+    attributes:
+      label: その他、伝えておきたいことがあれば

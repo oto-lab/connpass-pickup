@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "connpass pickup",
+  "version": "1.0.0",
+  "description": "connpassのイベント参加者をその場でシャッフルして発表順・登壇順を決められる拡張機能です。",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.connpass.com/event/*/participation*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

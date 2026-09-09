@@ -1,3 +1,8 @@
-node_modules
-results/*
-!results/eventId_currentTime.html
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
