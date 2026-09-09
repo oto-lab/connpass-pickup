@@ -9,8 +9,7 @@ export interface FetchEventsBatchOptions extends RequestOptions {
 const DEFAULT_CONCURRENCY = 2;
 
 /**
- * 複数の eventId をまとめて処理する。connpass への同時アクセス数を抑えるため、
- * 外部キューライブラリは使わず配列をチャンクに分けて順番に処理する簡易実装。
+ * 複数の eventId をまとめて処理する。connpass への同時アクセス数を抑えるため、外部キューライブラリは使わず配列をチャンクに分けて順番に処理する簡易実装。
  */
 export async function fetchEventsBatch(
   eventIds: string[],

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { fetchUserProfile } from "../../src/users/fetch-user.js";
 
-// connpass 開発者本人の公開プロフィール。今後も存在し続けることが見込めるため
-// 実サイトテストの固定ユーザーとして使用する。
+// connpass 開発者本人の公開プロフィール。今後も存在し続けることが見込めるため実サイトテストの固定ユーザーとして使用する。
 const NICKNAME = "haru860";
 
 describe("fetchUserProfile (real site)", () => {

@@ -175,12 +175,9 @@ async function resolveRole(
 }
 
 /**
- * connpass のイベント参加者ページをスクレイピングし、募集枠ごとの参加者一覧と、
- * 取得件数に関するメタ情報(全体人数・切り詰めの有無)を取得する。
+ * connpass のイベント参加者ページをスクレイピングし、募集枠ごとの参加者一覧と、取得件数に関するメタ情報(全体人数・切り詰めの有無)を取得する。
  *
- * connpass の参加者ページ自体は1つの募集枠につき最大100人までしかHTMLに描画しないが、
- * 100人を超える枠には専用の「もっと見る」ページ(ページネーションあり)が存在するため、
- * 既定ではそれを辿って全件取得する(`fetchAllPages: false` で無効化できる)。
+ * connpass の参加者ページ自体は1つの募集枠につき最大100人までしかHTMLに描画しないが、100人を超える枠には専用の「もっと見る」ページ(ページネーションあり)が存在するため、既定ではそれを辿って全件取得する(`fetchAllPages: false` で無効化できる)。
  */
 export async function fetchParticipantsDetailed(
   eventId: string,
@@ -227,9 +224,7 @@ export async function fetchParticipantsDetailed(
 }
 
 /**
- * connpass のイベント参加者ページをスクレイピングし、募集枠ごとの参加者一覧を取得する。
- * connpass の公式APIには参加者一覧を返すエンドポイントが存在しないため、
- * この機能は常にHTMLスクレイピングで実現している(APIキー不要)。
+ * connpass のイベント参加者ページをスクレイピングし、募集枠ごとの参加者一覧を取得する。connpass の公式APIには参加者一覧を返すエンドポイントが存在しないため、この機能は常にHTMLスクレイピングで実現している(APIキー不要)。
  *
  * 100人を超える枠は既定で「もっと見る」ページを辿って全件取得する(`options.fetchAllPages: false` で無効化可能)。取得できた人数や切り詰めの有無を確認したい場合は {@link fetchParticipantsDetailed} を使う。
  */

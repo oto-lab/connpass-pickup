@@ -1,6 +1,5 @@
 /**
- * Fisher-Yates で配列をシャッフルする。引数の配列は書き換えず、
- * シャッフル後の新しい配列を返す。
+ * Fisher-Yates で配列をシャッフルする。引数の配列は書き換えず、シャッフル後の新しい配列を返す。
  */
 export function shuffle<T>(items: readonly T[]): T[] {
   const result = [...items];

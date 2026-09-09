@@ -1,6 +1,5 @@
 /**
- * connpass が公開している .ics ファイルから最低限必要な項目だけを読み取る、
- * 自前実装の最小限 ics パーサ(外部の ical ライブラリには依存しない)。
+ * connpass が公開している .ics ファイルから最低限必要な項目だけを読み取る、自前実装の最小限 ics パーサ(外部の ical ライブラリには依存しない)。
  */
 export interface IcsEvent {
   summary?: string;

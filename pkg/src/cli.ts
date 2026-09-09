@@ -17,10 +17,8 @@ function envNumber(name: string): number | undefined {
 }
 
 /**
- * connpassへのアクセス設定を環境変数から読み取り、CLI全体で使い回す
- * {@link ConnpassClient} を組み立てる。
- * `CONNPASS_PICKUP_USER_AGENT` / `CONNPASS_PICKUP_PROXY` / `CONNPASS_PICKUP_RETRY` /
- * `CONNPASS_PICKUP_TIMEOUT` のいずれも未設定なら省略され、各機能の既定動作になる。
+ * connpassへのアクセス設定を環境変数から読み取り、CLI全体で使い回す {@link ConnpassClient} を組み立てる。
+ * `CONNPASS_PICKUP_USER_AGENT` / `CONNPASS_PICKUP_PROXY` / `CONNPASS_PICKUP_RETRY` / `CONNPASS_PICKUP_TIMEOUT` のいずれも未設定なら省略され、各機能の既定動作になる。
  */
 function createClientFromEnv(): ConnpassClient {
   const options: ConnpassClientOptions = {

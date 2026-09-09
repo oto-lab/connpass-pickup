@@ -9,9 +9,7 @@ import {
 export type GroupEventSummary = EventListCard;
 
 /**
- * connpass のグループ(サブドメインサイト)のトップページをスクレイピングし、
- * そのグループが主催するイベント一覧を取得する。
- * 廃止された API v1 の series_id 検索に相当する機能を代替する。
+ * connpass のグループ(サブドメインサイト)のトップページをスクレイピングし、そのグループが主催するイベント一覧を取得する。廃止された API v1 の series_id 検索に相当する機能を代替する。
  */
 export async function fetchGroupEvents(
   subdomain: string,

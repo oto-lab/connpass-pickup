@@ -61,9 +61,7 @@ async function packageChrome() {
   console.log(`packaged ${zipPath}`);
 }
 
-// Firefox向け: 公式ツールの web-ext でビルドする(manifestの妥当性チェックも兼ねる)。
-// 出力自体はzip形式だが、AMOへの提出や about:debugging での読み込みに使う
-// 拡張子として .xpi にリネームする。
+// Firefox向け: 公式ツールの web-ext でビルドする(manifestの妥当性チェックも兼ねる)。出力自体はzip形式だが、AMOへの提出や about:debugging での読み込みに使う拡張子として .xpi にリネームする。
 async function packageFirefox() {
   const outDir = join(distDir, "firefox");
   const result = await webExt.build(

@@ -31,9 +31,7 @@ import { fetchGroupEvents } from "./events/fetch-group-events.js";
 import { fetchUserProfile, fetchUserEvents } from "./users/fetch-user.js";
 
 /**
- * {@link ConnpassClient} に既定値として渡せるオプション。
- * 個々のメソッド呼び出しで渡したオプションが優先され、未指定のフィールドだけ
- * ここでの設定にフォールバックする。
+ * {@link ConnpassClient} に既定値として渡せるオプション。個々のメソッド呼び出しで渡したオプションが優先され、未指定のフィールドだけここでの設定にフォールバックする。
  */
 export interface ConnpassClientOptions extends FetchParticipantsOptions {
   /** {@link ConnpassClient.fetchEventsBatch} の既定の同時実行数 */

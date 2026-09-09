@@ -41,9 +41,7 @@ function parseNumber(text: string | undefined): number | undefined {
 }
 
 /**
- * connpass のイベント詳細ページと .ics ファイルをスクレイピングし、
- * イベントの基本情報を取得する。APIキーは不要。
- * 日時は HTML 上のローカライズされた文字列ではなく .ics の DTSTART/DTEND から取得する。
+ * connpass のイベント詳細ページと .ics ファイルをスクレイピングし、イベントの基本情報を取得する。APIキーは不要。日時は HTML 上のローカライズされた文字列ではなく .ics の DTSTART/DTEND から取得する。
  */
 export async function fetchEvent(
   eventId: string,

@@ -9,9 +9,7 @@ import { getResultsDir } from "../paths.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// ビルド後(dist/index.mjs はパッケージ直下)は "../assets"、
-// 開発時(このファイルは src/core/result.ts)は "../../assets" になる。
-// バンドラーによる階層変化に依存しないよう、実在するほうを採用する。
+// ビルド後(dist/index.mjs はパッケージ直下)は "../assets"、開発時(このファイルは src/core/result.ts)は "../../assets" になる。バンドラーによる階層変化に依存しないよう、実在するほうを採用する。
 function resolveAssetsDir(): string {
   const candidates = [
     join(__dirname, "..", "assets"),

@@ -4,13 +4,9 @@ import { win32, posix } from "node:path";
 const APP_DIR_NAME = "connpass-pickup";
 
 /**
- * OS標準のユーザーデータディレクトリ配下に結果保存用フォルダを決定する。
- * npm パッケージの更新・アンインストールでは消えない場所に置くための実装で、
- * 外部パッケージには依存せず OS ごとの慣習的なパスを自前で組み立てている。
+ * OS標準のユーザーデータディレクトリ配下に結果保存用フォルダを決定する。npm パッケージの更新・アンインストールでは消えない場所に置くための実装で、外部パッケージには依存せず OS ごとの慣習的なパスを自前で組み立てている。
  *
- * `node:path` の既定 `join` は実行中のOSに応じて区切り文字が変わってしまい、
- * テストで process.platform を差し替えても追従しないため、
- * ここでは判定した platform に対応する `win32`/`posix` を明示的に使う。
+ * `node:path` の既定 `join` は実行中のOSに応じて区切り文字が変わってしまい、テストで process.platform を差し替えても追従しないため、ここでは判定した platform に対応する `win32`/`posix` を明示的に使う。
  */
 export function getResultsDir(): string {
   const platform = process.platform;

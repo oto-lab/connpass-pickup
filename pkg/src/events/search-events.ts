@@ -34,9 +34,7 @@ function hasAnyFilter(params: SearchEventsParams): boolean {
 }
 
 /**
- * connpass のイベント検索ページをスクレイピングする。
- * 廃止された API v1 の keyword/ym/ymd/start(ページング)/order 相当の検索を、
- * APIキー不要の `/search/` ページで代替する。
+ * connpass のイベント検索ページをスクレイピングする。廃止された API v1 の keyword/ym/ymd/start(ページング)/order 相当の検索を、APIキー不要の `/search/` ページで代替する。
  *
  * connpass の検索ページ自体の仕様として、`keyword`/`dateFrom`/`dateTo`/`prefectures` のいずれも指定しないと検索結果が0件になる(キーワード検索必須ではないが、何らかの絞り込み条件は必須)。キーワード無しで「現在募集中のイベント一覧」を取得したい場合は、`prefectures: ["online"]` のように地域だけを指定すればよい。
  */
