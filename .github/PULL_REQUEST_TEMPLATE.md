@@ -36,4 +36,4 @@ closes
 - [ ] `pnpm run check` を実行した(lint & format)
 - [ ] `pnpm run test` を実行した
 - [ ] `pnpm run build` を実行した
-- [ ] (任意)`pnpm run test:coverage` を実行し、新規追加分のカバレッジを確認した
+- [ ] (任意)`pnpm --filter connpass-pickup run test:coverage` を実行し、新規追加分のカバレッジを確認した

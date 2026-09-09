@@ -17,10 +17,11 @@ pickup 385269
 `pkg/` はプログラムから呼び出せるライブラリとしても使えます。
 
 ```ts
-import { fetchParticipants, shuffle } from "connpass-pickup";
+import { ConnpassClient } from "connpass-pickup";
 
-const participants = await fetchParticipants("385269");
-console.log(shuffle(participants["General Attendees / 参加枠"]));
+const client = new ConnpassClient();
+const participants = await client.fetchParticipants("385269");
+console.log(client.shuffle(participants["General Attendees / 参加枠"]));
 ```
 
 ## 開発
