@@ -2,7 +2,7 @@
 
 [connpass](https://connpass.com/) のイベント参加者ページに、その場でシャッフル機能を追加する Chrome / Firefox 向け拡張機能(Manifest V3)です。
 
-connpass のイベント参加者ページ(`https://*.connpass.com/event/*/participation*`)を開くと、右下にボタンが表示されます。押すとパネルが開き、募集枠の選択・重複排除・追加参加者の入力・シャッフルをそのページ上だけで完結できます。結果はコピーするか、HTMLファイルとしてダウンロードできます。
+connpass のイベント参加者ページ(`https://*.connpass.com/event/*/participation*`)を開いた状態でツールバーの拡張機能アイコンをクリックすると、ポップアップが開きます。募集枠の選択・重複排除・追加参加者の入力・シャッフルをポップアップ上だけで完結でき、結果はコピーするか、HTMLファイルとしてダウンロードできます。ポップアップは開くたびにそのページから参加者一覧を取得し直すため、ページ側で参加者が増減しても再読み込みだけで最新の状態を反映できます。
 
 > [!Note]
 > npm パッケージ版(`pkg/`)とはロジックを共有していません。拡張機能単体でネットワークアクセスなしに完結させるため、独立して実装しています。
@@ -16,7 +16,7 @@ pnpm install
 pnpm --filter connpass-pickup-ext run build
 ```
 
-`dist/chrome/` と `dist/firefox/` に、それぞれのブラウザ向けの拡張機能一式(`manifest.json` / `content.js` / `styles.css` / `icons/`)が生成されます。
+`dist/chrome/` と `dist/firefox/` に、それぞれのブラウザ向けの拡張機能一式(`manifest.json` / `content.js` / `popup.html` / `popup.js` / `styles.css` / `icons/`)が生成されます。
 
 ## ブラウザへの読み込み方
 

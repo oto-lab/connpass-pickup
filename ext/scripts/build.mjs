@@ -39,6 +39,8 @@ async function assembleTarget({ name, manifest }) {
   await writeFile(join(outDir, "manifest.json"), manifestJson);
 
   await cp(join(distDir, "content.iife.js"), join(outDir, "content.js"));
+  await cp(join(distDir, "popup.iife.js"), join(outDir, "popup.js"));
+  await cp(join(srcDir, "popup.html"), join(outDir, "popup.html"));
   await cp(join(srcDir, "styles.css"), join(outDir, "styles.css"));
   await cp(join(srcDir, "icons"), join(outDir, "icons"), { recursive: true });
 }
