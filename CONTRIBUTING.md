@@ -63,11 +63,17 @@ pnpm run ci && pnpm run typecheck && pnpm run test && pnpm run build
 
 ## リリース手順(メンテナー向け)
 
-リリースは GitHub Actions の `release` ワークフロー(`workflow_dispatch`)から手動で行います。`version` に `patch`/`minor`/`major`/`prerelease` のいずれか、または `6.1.0` のような明示的なバージョンを指定してください。
+`pkg/` と `ext/` はバージョンも公開先も別々なので、リリースワークフローも分かれています。GitHub Actions からそれぞれ手動(`workflow_dispatch`)で実行してください。
 
-ワークフローは `pkg/` のチェック・ビルド・バージョン更新・npm への公開(trusted publishing、OIDC 経由で `NPM_TOKEN` は不要)・コミットとタグの push・GitHub Release の作成までを行います。`ext/` は Chrome/Firefox 向けの zip をビルドして Release に添付しますが、各ストアへの提出は別途手動で行う必要があります。
+### pkg(npmパッケージ)— `release-pkg` ワークフロー
 
-trusted publishing は npmjs.com 側で一度だけ設定が必要です(対象パッケージの Settings → Publishing access → Trusted publishers → GitHub で、このリポジトリの `release.yml` を指定します)。
+`version` に `patch`/`minor`/`major`/`prerelease` のいずれか、または `6.1.0` のような明示的なバージョンを指定します。`pkg/` のチェック・ビルド・バージョン更新・npm への公開(trusted publishing、OIDC 経由で `NPM_TOKEN` は不要)・コミットとタグ(`pkg-v<version>`)の push・GitHub Release の作成までを行います。
+
+trusted publishing は npmjs.com 側で一度だけ設定が必要です(`connpass-pickup` パッケージの Settings → Publishing access → Trusted publishers → GitHub で、このリポジトリの `release-pkg.yml` を指定します)。
+
+### ext(ブラウザ拡張機能)— `release-ext` ワークフロー
+
+`version` の指定方法は pkg と同様です。`ext/` のチェック・ビルド・マニフェスト(`manifest.chrome.json`/`manifest.firefox.json`)を含むバージョン更新・コミットとタグ(`ext-v<version>`)の push・GitHub Release の作成までを行います。npmへの公開は行わず、Chrome/Firefox 向けの zip を Release に添付します。各ストアへの提出は別途手動で行う必要があります。
 
 ## ライセンス
 

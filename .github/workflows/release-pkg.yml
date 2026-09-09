@@ -1,4 +1,4 @@
-name: release
+name: release-pkg
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
         default: ""
 
 # Trusted publishing: npmがこのワークフローをOIDCで認証するため、NPM_TOKEN シークレットは不要。
-# 事前に npmjs.com 側でリンクを設定しておく(パッケージ Settings -> Publishing access -> Trusted publishers -> GitHub)。
+# 事前に npmjs.com 側でリンクを設定しておく(pkg の Settings -> Publishing access -> Trusted publishers -> GitHub)。
 permissions:
   contents: write # バージョン更新コミット/タグの push と GitHub Release の作成
   id-token: write # npm trusted publishing (OIDC)
@@ -34,10 +34,9 @@ jobs:
 
       - run: pnpm install
       - run: pnpm run ci
-      - run: pnpm run typecheck
-      - run: pnpm run test
-      - run: pnpm run build
-      - run: pnpm --filter connpass-pickup-ext run package
+      - run: pnpm --filter connpass-pickup run typecheck
+      - run: pnpm --filter connpass-pickup run test
+      - run: pnpm --filter connpass-pickup run build
 
       - name: Bump pkg/ version
         id: bump
@@ -46,7 +45,7 @@ jobs:
           OLD="$(node -p "require('./package.json').version")"
           npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version >/dev/null
           NEW="$(node -p "require('./package.json').version")"
-          echo "version=v${NEW}" >> "$GITHUB_OUTPUT"
+          echo "version=pkg-v${NEW}" >> "$GITHUB_OUTPUT"
           if [ "$OLD" = "$NEW" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "::notice::バージョンは既に ${NEW} のため、更新コミットはスキップしてリリースだけ行います。"
@@ -80,7 +79,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if [ "${{ steps.bump.outputs.changed }}" = "true" ]; then
-            git commit -am "release: pkg ${{ steps.bump.outputs.version }}"
+            git commit -am "release(pkg): ${{ steps.bump.outputs.version }}"
           fi
           if ! git rev-parse -q --verify "refs/tags/${{ steps.bump.outputs.version }}" >/dev/null; then
             git tag "${{ steps.bump.outputs.version }}"
@@ -94,7 +93,4 @@ jobs:
           gh release create "${{ steps.bump.outputs.version }}" \
             --title "${{ steps.bump.outputs.version }}" \
             --generate-notes \
-            --notes "拡張機能(Chrome/Firefox)のビルド成果物を以下に添付しています。ストアへの提出は別途手動で行ってください。" \
-            ext/dist/chrome.zip#connpass-pickup-chrome.zip \
-            ext/dist/firefox.zip#connpass-pickup-firefox.zip \
             ${{ steps.bump.outputs.prerelease == 'true' && '--prerelease' || '' }}

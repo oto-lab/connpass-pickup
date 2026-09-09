@@ -1,0 +1,93 @@
+name: release-ext
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "リリースするバージョン: semverのバンプ種別(patch/minor/major/prerelease)、または明示バージョン(例: 1.1.0)"
+        required: true
+        default: patch
+
+permissions:
+  contents: write # バージョン更新コミット/タグの push と GitHub Release の作成
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install
+      - run: pnpm run ci
+      - run: pnpm --filter connpass-pickup-ext run typecheck
+      - run: pnpm --filter connpass-pickup-ext run test
+      - run: pnpm --filter connpass-pickup-ext run build
+
+      - name: Bump ext/ version
+        id: bump
+        working-directory: ext
+        run: |
+          OLD="$(node -p "require('./package.json').version")"
+          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version >/dev/null
+          NEW="$(node -p "require('./package.json').version")"
+          echo "version=ext-v${NEW}" >> "$GITHUB_OUTPUT"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::バージョンは既に ${NEW} のため、更新コミットはスキップしてリリースだけ行います。"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ "$NEW" == *-* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: マニフェストのバージョンも合わせて更新する
+        working-directory: ext
+        run: |
+          NEW="$(node -p "require('./package.json').version")"
+          for f in src/manifest.chrome.json src/manifest.firefox.json; do
+            node -e "
+              const fs = require('node:fs');
+              const path = '$f';
+              const manifest = JSON.parse(fs.readFileSync(path, 'utf-8'));
+              manifest.version = '$NEW';
+              fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');
+            "
+          done
+
+      - run: pnpm --filter connpass-pickup-ext run package
+
+      - name: Commit, tag and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ "${{ steps.bump.outputs.changed }}" = "true" ]; then
+            git commit -am "release(ext): ${{ steps.bump.outputs.version }}"
+          fi
+          if ! git rev-parse -q --verify "refs/tags/${{ steps.bump.outputs.version }}" >/dev/null; then
+            git tag "${{ steps.bump.outputs.version }}"
+          fi
+          git push origin HEAD "${{ steps.bump.outputs.version }}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.bump.outputs.version }}" \
+            --title "${{ steps.bump.outputs.version }}" \
+            --generate-notes \
+            --notes "拡張機能(Chrome/Firefox)のビルド成果物を添付しています。ストアへの提出は別途手動で行ってください。" \
+            ext/dist/chrome.zip#connpass-pickup-ext-chrome.zip \
+            ext/dist/firefox.zip#connpass-pickup-ext-firefox.zip \
+            ${{ steps.bump.outputs.prerelease == 'true' && '--prerelease' || '' }}
