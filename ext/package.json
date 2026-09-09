@@ -26,6 +26,7 @@
     "happy-dom": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "web-ext": "^10.6.0"
   }
 }

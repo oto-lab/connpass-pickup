@@ -29,14 +29,20 @@ pnpm --filter connpass-pickup-ext run build
 ### Firefox
 
 1. `about:debugging#/runtime/this-firefox` を開く
-2. 「一時的なアドオンを読み込む」から `ext/dist/chrome` 配下の `manifest.json` を選択する
+2. 「一時的なアドオンを読み込む」から `ext/dist/firefox` 配下の `manifest.json` を選択する
 
 ## 配布用パッケージの作成
 
-各ストアに提出する zip ファイルを作りたい場合は、次のコマンドで `dist/chrome.zip` と `dist/firefox.zip` を生成できます。
+各ストアに提出する成果物を作りたい場合は、次のコマンドを実行します。
 
 ```sh
 pnpm --filter connpass-pickup-ext run package
+```
+
+`dist/chrome.zip`(通常のzip)と、[web-ext](https://github.com/mozilla/web-ext) でビルドした `dist/firefox.xpi`(Firefox向け、manifestの妥当性チェック込み)が生成されます。`--target=chrome`/`--target=firefox` を付けると、どちらか一方だけをビルドできます。
+
+```sh
+pnpm --filter connpass-pickup-ext exec node scripts/build.mjs --zip --target=firefox
 ```
 
 各ストアへの実際の提出は手動で行う必要があります。

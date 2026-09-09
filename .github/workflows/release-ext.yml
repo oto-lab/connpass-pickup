@@ -4,12 +4,20 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "リリースするバージョン: semverのバンプ種別(patch/minor/major/prerelease)、または明示バージョン(例: 1.1.0)"
-        required: true
-        default: patch
+        description: "リリースするバージョン(例: 1.2.3)。空欄なら ext/package.json の現在のバージョンをそのまま使う(バンプしない)"
+        required: false
+        default: ""
+      force_release:
+        description: "最新タグと同じ/古いバージョンでも強制的にリリースする"
+        required: false
+        default: "false"
+      target:
+        description: "ビルド対象: all/chrome/firefox"
+        required: false
+        default: "all"
 
 permissions:
-  contents: write # バージョン更新コミット/タグの push と GitHub Release の作成
+  contents: write
 
 jobs:
   release:
@@ -29,65 +37,109 @@ jobs:
       - run: pnpm run ci
       - run: pnpm --filter connpass-pickup-ext run typecheck
       - run: pnpm --filter connpass-pickup-ext run test
-      - run: pnpm --filter connpass-pickup-ext run build
 
-      - name: Bump ext/ version
-        id: bump
+      - name: バージョンを指定された場合のみ適用する
+        if: inputs.version != ''
         working-directory: ext
         run: |
-          OLD="$(node -p "require('./package.json').version")"
-          npm version "${{ inputs.version }}" --no-git-tag-version --allow-same-version >/dev/null
-          NEW="$(node -p "require('./package.json').version")"
-          echo "version=ext-v${NEW}" >> "$GITHUB_OUTPUT"
-          if [ "$OLD" = "$NEW" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::バージョンは既に ${NEW} のため、更新コミットはスキップしてリリースだけ行います。"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+          VERSION="${{ inputs.version }}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid version format: $VERSION"
+            exit 1
           fi
-
-          if [[ "$NEW" == *-* ]]; then
-            echo "prerelease=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "prerelease=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: マニフェストのバージョンも合わせて更新する
-        working-directory: ext
-        run: |
-          NEW="$(node -p "require('./package.json').version")"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version >/dev/null
           for f in src/manifest.chrome.json src/manifest.firefox.json; do
             node -e "
               const fs = require('node:fs');
-              const path = '$f';
-              const manifest = JSON.parse(fs.readFileSync(path, 'utf-8'));
-              manifest.version = '$NEW';
-              fs.writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');
+              const manifest = JSON.parse(fs.readFileSync('$f', 'utf-8'));
+              manifest.version = '$VERSION';
+              fs.writeFileSync('$f', JSON.stringify(manifest, null, 2) + '\n');
             "
           done
 
-      - run: pnpm --filter connpass-pickup-ext run package
+      - name: Read package info
+        id: pkg
+        working-directory: ext
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Commit, tag and push
+      - name: Build
+        run: |
+          TARGET="${{ inputs.target || 'all' }}"
+          pnpm --filter connpass-pickup-ext exec tsdown
+          pnpm --filter connpass-pickup-ext exec node scripts/build.mjs --zip --target="$TARGET"
+
+      - name: Get latest ext tag
+        id: tag
+        run: |
+          git fetch --tags
+          LATEST_TAG="$(git tag --list 'ext-v*' --sort=-v:refname | head -n1 || true)"
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          LATEST="${LATEST_TAG#ext-v}"
+          echo "latest_version=${LATEST:-0.0.0}" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether to release
+        id: compare
+        run: |
+          if [ "${{ inputs.force_release }}" = "true" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          LATEST="${{ steps.tag.outputs.latest_version }}"
+          VERSION="${{ steps.pkg.outputs.version }}"
+          if [ -z "${{ steps.tag.outputs.latest_tag }}" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$LATEST" = "$VERSION" ]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          HIGHEST="$(printf '%s\n%s\n' "$LATEST" "$VERSION" | sort -V | tail -n1)"
+          if [ "$HIGHEST" = "$VERSION" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::ext/package.jsonのバージョン($VERSION)が最新タグ($LATEST)以下のため、リリースをスキップします(force_release: trueで強制可能)。"
+          fi
+
+      - name: Commit and push version bump
+        if: steps.compare.outputs.should_release == 'true' && inputs.version != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ "${{ steps.bump.outputs.changed }}" = "true" ]; then
-            git commit -am "release(ext): ${{ steps.bump.outputs.version }}"
+          if ! git diff --quiet -- ext/package.json ext/src/manifest.chrome.json ext/src/manifest.firefox.json; then
+            git commit -am "release(ext): ext-v${{ steps.pkg.outputs.version }}"
+            git push origin HEAD:${{ github.ref_name }}
           fi
-          if ! git rev-parse -q --verify "refs/tags/${{ steps.bump.outputs.version }}" >/dev/null; then
-            git tag "${{ steps.bump.outputs.version }}"
+
+      - name: Create tag
+        if: steps.compare.outputs.should_release == 'true'
+        run: |
+          TAG="ext-v${{ steps.pkg.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; skipping"
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
           fi
-          git push origin HEAD "${{ steps.bump.outputs.version }}"
 
       - name: Create GitHub Release
+        if: steps.compare.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.bump.outputs.version }}" \
-            --title "${{ steps.bump.outputs.version }}" \
+          TAG="ext-v${{ steps.pkg.outputs.version }}"
+          ASSETS=()
+          [ -f ext/dist/chrome.zip ] && ASSETS+=("ext/dist/chrome.zip#connpass-pickup-ext-chrome-${{ steps.pkg.outputs.version }}.zip")
+          [ -f ext/dist/firefox.xpi ] && ASSETS+=("ext/dist/firefox.xpi#connpass-pickup-ext-firefox-${{ steps.pkg.outputs.version }}.xpi")
+
+          gh release create "$TAG" \
+            --title "$TAG" \
             --generate-notes \
             --notes "拡張機能(Chrome/Firefox)のビルド成果物を添付しています。ストアへの提出は別途手動で行ってください。" \
-            ext/dist/chrome.zip#connpass-pickup-ext-chrome.zip \
-            ext/dist/firefox.zip#connpass-pickup-ext-firefox.zip \
-            ${{ steps.bump.outputs.prerelease == 'true' && '--prerelease' || '' }}
+            "${ASSETS[@]}"

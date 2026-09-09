@@ -73,7 +73,11 @@ trusted publishing は npmjs.com 側で一度だけ設定が必要です(`connpa
 
 ### ext(ブラウザ拡張機能)— `release-ext` ワークフロー
 
-`version` の指定方法は pkg と同様です。`ext/` のチェック・ビルド・マニフェスト(`manifest.chrome.json`/`manifest.firefox.json`)を含むバージョン更新・コミットとタグ(`ext-v<version>`)の push・GitHub Release の作成までを行います。npmへの公開は行わず、Chrome/Firefox 向けの zip を Release に添付します。各ストアへの提出は別途手動で行う必要があります。
+`version` は `1.2.3` のような明示的なバージョンのみ受け付けます(空欄なら `ext/package.json` の現在のバージョンをそのままリリースします)。指定した場合は `ext/package.json` と両マニフェスト(`manifest.chrome.json`/`manifest.firefox.json`)のバージョンをまとめて更新します。
+
+最新の `ext-v*` タグ以下のバージョンではリリースをスキップします(`force_release: true` で強制可能)。`target`(既定 `all`)で `chrome`/`firefox` のどちらかだけをビルドすることもできます。
+
+npmへの公開は行わず、Chrome向けの zip と、[web-ext](https://github.com/mozilla/web-ext) でビルドした Firefox 向けの xpi を GitHub Release に添付します。各ストアへの提出は別途手動で行う必要があります。
 
 ## ライセンス
 
