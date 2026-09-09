@@ -4,7 +4,7 @@
  */
 export function buildResultHtml(eventId: string, members: string[]): string {
   const items = members
-    .map((member, index) => `<li>${index + 1}. ${escapeHtml(member)}</li>`)
+    .map((member) => `<li>${escapeHtml(member)}</li>`)
     .join("\n");
 
   return `<!doctype html>
