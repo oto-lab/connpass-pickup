@@ -1,6 +1,6 @@
 {
   "name": "connpass-pickup-ext",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "connpass-pickup のブラウザ拡張機能(Chrome / Firefox, Manifest V3)",
   "license": "MIT",
