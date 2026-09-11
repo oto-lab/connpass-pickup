@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "ransu": "^0.1.1",
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {

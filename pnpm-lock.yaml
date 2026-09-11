@@ -74,6 +74,9 @@ importers:
 
   ext:
     dependencies:
+      ransu:
+        specifier: ^0.1.1
+        version: 0.1.1
       webextension-polyfill:
         specifier: ^0.12.0
         version: 0.12.0
@@ -132,6 +135,9 @@ importers:
       prompts:
         specifier: ^2.4.2
         version: 2.4.2
+      ransu:
+        specifier: ^0.1.1
+        version: 0.1.1
       top-user-agents:
         specifier: ^2.1.134
         version: 2.1.134
@@ -2045,6 +2051,10 @@ packages:
 
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
+
+  ransu@0.1.1:
+    resolution: {integrity: sha512-Gyw/yBTK8QlNj/TfQcc6nEbwsRebMqnY3dEFYJyZdy/iLyzTTFFIxsJko/KjfJrdV0wVxFL64jCPyBERSez76Q==}
+    engines: {node: '>=18'}
 
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
@@ -4461,6 +4471,8 @@ snapshots:
   quansync@1.0.0: {}
 
   quick-format-unescaped@4.0.4: {}
+
+  ransu@0.1.1: {}
 
   rc@1.2.8:
     dependencies:
