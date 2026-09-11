@@ -79,6 +79,8 @@ jobs:
               fs.writeFileSync('$f', JSON.stringify(manifest, null, 2) + '\n');
             "
           done
+          cd ..
+          pnpm exec prettier --write ext/src/manifest.chrome.json ext/src/manifest.firefox.json
 
       - name: Build
         run: |
