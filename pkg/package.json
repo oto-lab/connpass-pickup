@@ -1,6 +1,6 @@
 {
   "name": "connpass-pickup",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "connpass のイベント参加者情報をシャッフルする CLI と、connpass のイベント情報を扱う軽量スクレイピング API ライブラリ",
   "keywords": [
     "connpass",
