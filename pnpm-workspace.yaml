@@ -15,3 +15,6 @@ catalog:
   "@vitest/coverage-v8": ^5.0.0
   "@types/node": ^22.20.1
   happy-dom: ^20.14.0
+
+minimumReleaseAgeExclude:
+  - betteropen@1.0.0

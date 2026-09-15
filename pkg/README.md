@@ -113,7 +113,7 @@ const members = shuffle(participants["General Attendees / 参加枠"]);
 | `renderResultHtml(markdown)` | MarkdownをスタイルつきのHTML文字列に変換する |
 | `toJson(data)` / `toCsv(members)` | 結果をJSON/CSV文字列にする |
 | `saveResult(eventId, content, format)` | 結果をOS標準のディレクトリに保存する(`format`: `html`/`markdown`/`json`/`csv`) |
-| `openResult(filePath, options?)` | 保存したファイルを既定のアプリで開く。`options` は [open](https://github.com/sindresorhus/open) にそのまま渡される(`wait`: 起動したアプリの終了を待つ、`app`: 開くアプリを指定する、など) |
+| `openResult(filePath, options?)` | 保存したファイルを既定のアプリで開く。`options` は [betteropen](https://github.com/otnc/betteropen) にそのまま渡される(`wait`: 起動したアプリの終了を待つ、`app`: 開くアプリを指定する、など) |
 | `getResultsDir()` | 結果の保存先ディレクトリを取得する |
 | `fetchEvent(eventId, options?)` | イベントの詳細情報(タイトル・日時・会場・募集枠の定員など)を取得する |
 | `fetchEventsBatch(eventIds, options?)` | 複数イベントの情報をまとめて取得する |

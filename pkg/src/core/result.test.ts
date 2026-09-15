@@ -10,7 +10,9 @@ vi.mock("../paths.js", () => ({
 }));
 
 const openMock = vi.fn().mockResolvedValue(undefined);
-vi.mock("open", () => ({ default: (...args: unknown[]) => openMock(...args) }));
+vi.mock("betteropen", () => ({
+  default: (...args: unknown[]) => openMock(...args),
+}));
 
 const {
   buildResultMarkdown,
