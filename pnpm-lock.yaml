@@ -112,8 +112,8 @@ importers:
         specifier: ^4.3.1
         version: 4.3.1
       betteropen:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^2.0.0
+        version: 2.0.0
       cheerio:
         specifier: ^1.2.0
         version: 1.2.0
@@ -883,8 +883,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  betteropen@1.0.0:
-    resolution: {integrity: sha512-0bUCRjzc2ao6eUJN0dzMJg78Lw3uDRHDapWHRn0NWmhG/9PwHcTzWLYnUEnwpgF9qVqeVAKpbIYT12denItSOA==}
+  betteropen@2.0.0:
+    resolution: {integrity: sha512-WyTIqq+zIs1tKKiA0nQqfmRG2wNaatTxzfpqkqJRWZDcKX6K1qyaAbJANPRsXrddWegamqVzT+5IWUSJ/tFfvw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -3319,7 +3319,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  betteropen@1.0.0:
+  betteropen@2.0.0:
     dependencies:
       citty: 0.2.2
       magic-bytes.js: 1.13.1
